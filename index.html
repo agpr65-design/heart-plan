@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prachi's Heart Plan</title>
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+apiKey: “AIzaSyBMdKL8_2t9prkT_a7g7ZDwfOtgA4PCyJI”,
+authDomain: “heart-plan.firebaseapp.com”,
+projectId: “heart-plan”,
+storageBucket: “heart-plan.firebasestorage.app”,
+messagingSenderId: “276121567570”,
+appId: “1:276121567570:web:8c4efeffc82d2880ac3a8b”
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const USER_ID = ‘prachi’;
+
+// Expose to global scope so non-module scripts can use them
+window._db = db;
+window._doc = doc;
+window._getDoc = getDoc;
+window._setDoc = setDoc;
+window._USER_ID = USER_ID;
+window._fbReady = true;
+window.dispatchEvent(new Event(‘fbReady’));
+</script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+:root {
+  --bg: #F7F8FA;
+  --card: #FFFFFF;
+  --border: #EAECF0;
+  --text: #101828;
+  --muted: #667085;
+  --accent: #E8435A;
+  --accent-light: #FEF0F2;
+  --green: #039855;
+  --green-light: #ECFDF3;
+  --amber: #B54708;
+  --amber-light: #FFFAEB;
+  --blue: #1D4ED8;
+  --blue-light: #EFF6FF;
+  --shadow: 0 1px 3px rgba(16,24,40,0.1), 0 1px 2px rgba(16,24,40,0.06);
+  --shadow-md: 0 4px 8px rgba(16,24,40,0.08);
+}
+
+body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding-bottom:72px; }
+
+/* ── HEADER ── */
+.hdr { background:var(--card); border-bottom:1px solid var(--border); padding:14px 16px; position:sticky; top:0; z-index:50; }
+.hdr-row { display:flex; align-items:center; justify-content:space-between; }
+.hdr h1 { font-size:16px; font-weight:700; }
+.hdr p  { font-size:11px; color:var(--muted); margin-top:1px; }
+.xp-pill { background:var(--accent-light); color:var(--accent); font-size:11px; font-weight:700; padding:4px 10px; border-radius:20px; white-space:nowrap; }
+
+/* ── NAV ── */
+.nav { position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:1px solid var(--border); display:flex; z-index:50; }
+.nav-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 4px 6px; border:none; background:none; cursor:pointer; font-family:'Inter',sans-serif; font-size:10px; font-weight:500; color:var(--muted); transition:color 0.15s; }
+.nav-item.on { color:var(--accent); font-weight:700; }
+.nav-icon { font-size:18px; }
+
+/* ── PAGES ── */
+.pg { display:none; max-width:480px; margin:0 auto; padding:16px; }
+.pg.on { display:block; }
+
+/* ── DAY BAR ── */
+.day-bar { display:flex; align-items:center; gap:10px; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px 14px; margin-bottom:14px; box-shadow:var(--shadow); }
+.day-arr { width:32px; height:32px; border-radius:50%; border:1px solid var(--border); background:var(--bg); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.day-arr:hover { background:var(--accent-light); border-color:var(--accent); color:var(--accent); }
+.day-mid { flex:1; text-align:center; }
+.day-mid .dn  { font-size:20px; font-weight:700; }
+.day-mid .dd  { font-size:11px; color:var(--muted); margin-top:2px; }
+
+/* ── PROGRESS PILLS ── */
+.pills { display:flex; gap:6px; margin-bottom:14px; }
+.pill { flex:1; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:10px 8px; text-align:center; box-shadow:var(--shadow); }
+.pill .pv { font-size:15px; font-weight:700; }
+.pill .pk { font-size:9px; color:var(--muted); font-weight:500; margin-top:2px; }
+.pill-bar { height:3px; background:var(--border); border-radius:3px; margin-top:6px; overflow:hidden; }
+.pill-fill { height:100%; border-radius:3px; transition:width .5s; }
+
+/* ── SECTION LABEL ── */
+.sec-lbl { font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin:14px 0 8px; }
+
+/* ── GHIYA CARD ── */
+.ghiya { display:flex; align-items:center; gap:12px; background:var(--green-light); border:1px solid #A6F4C5; border-radius:14px; padding:13px 14px; margin-bottom:6px; }
+.ghiya-txt h3 { font-size:13px; font-weight:700; color:#027A48; }
+.ghiya-txt p  { font-size:11px; color:#039855; margin-top:2px; }
+.ghiya-check { margin-left:auto; width:30px; height:30px; border-radius:50%; border:2px solid #039855; background:white; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; color:#039855; transition:all .2s; flex-shrink:0; }
+.ghiya-check.on { background:#039855; color:white; }
+
+/* ── MEAL SECTION ── */
+.meal-sec { background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-bottom:10px; box-shadow:var(--shadow); }
+.meal-hdr { display:flex; align-items:center; gap:10px; padding:12px 14px; cursor:pointer; }
+.meal-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.meal-lbl { font-size:13px; font-weight:600; flex:1; }
+.meal-time { font-size:11px; color:var(--muted); }
+.meal-arrow { font-size:14px; color:var(--muted); transition:transform .2s; flex-shrink:0; }
+.meal-arrow.open { transform:rotate(90deg); }
+
+/* DIVIDER inside meal */
+.meal-divider { height:1px; background:var(--border); margin:0 14px; }
+
+/* OPTION ROW */
+.meal-body { padding:10px 14px 14px; }
+.opt-row { display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); cursor:pointer; }
+.opt-row:last-child { border-bottom:none; padding-bottom:0; }
+.opt-radio { width:18px; height:18px; border-radius:50%; border:2px solid var(--border); flex-shrink:0; margin-top:1px; transition:all .15s; display:flex; align-items:center; justify-content:center; }
+.opt-radio.on { background:var(--accent); border-color:var(--accent); }
+.opt-radio.on::after { content:''; width:6px; height:6px; border-radius:50%; background:white; }
+.opt-info { flex:1; }
+.opt-name { font-size:13px; font-weight:600; margin-bottom:3px; }
+.opt-macros { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:4px; }
+.opt-macro { font-size:10px; color:var(--muted); font-weight:500; }
+.opt-macro b { color:var(--text); font-weight:600; }
+.opt-tags { display:flex; gap:4px; flex-wrap:wrap; }
+.tag { font-size:9px; font-weight:600; padding:2px 7px; border-radius:20px; }
+.tag-g { background:var(--green-light); color:var(--green); }
+.tag-b { background:var(--blue-light); color:var(--blue); }
+.tag-a { background:var(--amber-light); color:var(--amber); }
+.tag-r { background:var(--accent-light); color:var(--accent); }
+
+/* NONE option */
+.none-row { display:flex; align-items:center; gap:8px; padding:8px 0 0; cursor:pointer; color:var(--muted); font-size:11px; font-weight:500; }
+.none-radio { width:16px; height:16px; border-radius:50%; border:2px solid var(--border); flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.none-radio.on { background:var(--muted); border-color:var(--muted); }
+.none-radio.on::after { content:''; width:5px; height:5px; border-radius:50%; background:white; }
+
+/* ── EXERCISE CARD ── */
+.ex-card { display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:13px 14px; box-shadow:var(--shadow); }
+.ex-info { flex:1; }
+.ex-info h3 { font-size:13px; font-weight:600; }
+.ex-info p  { font-size:11px; color:var(--muted); margin-top:2px; }
+.ex-check { width:30px; height:30px; border-radius:50%; border:2px solid var(--border); background:var(--bg); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; color:var(--muted); transition:all .2s; flex-shrink:0; }
+.ex-check.on { background:var(--green); border-color:var(--green); color:white; }
+
+/* ── OFFICE SNACKS ── */
+.office-snacks { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.os-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px; box-shadow:var(--shadow); }
+.os-card .oe { font-size:22px; }
+.os-card .on2 { font-size:12px; font-weight:600; margin-top:5px; }
+.os-card .om { font-size:10px; color:var(--muted); margin-top:2px; }
+.os-card .ot { font-size:10px; color:var(--green); font-weight:500; margin-top:4px; }
+
+/* ── XP TOAST ── */
+.toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(8px); background:var(--text); color:white; padding:8px 16px; border-radius:20px; font-size:12px; font-weight:600; opacity:0; transition:all .25s; z-index:200; pointer-events:none; white-space:nowrap; }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* ── CALENDAR ── */
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-bottom:14px; }
+.cal-day { aspect-ratio:1; border-radius:8px; background:var(--card); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; cursor:pointer; position:relative; transition:all .15s; }
+.cal-day:hover { border-color:var(--accent); color:var(--accent); }
+.cal-day.cur { background:var(--accent); color:white; border-color:var(--accent); }
+.cal-day.done::after { content:''; position:absolute; top:-3px; right:-3px; width:8px; height:8px; border-radius:50%; background:var(--green); border:1.5px solid var(--bg); }
+
+/* ── STATS / GUIDES ── */
+.guide-row { padding:12px 0; border-bottom:1px solid var(--border); }
+.guide-row:last-child { border-bottom:none; }
+.guide-row-top { display:flex; align-items:center; gap:8px; margin-bottom:5px; }
+.guide-row-top .ge { font-size:18px; }
+.guide-row-top .gn { font-size:13px; font-weight:600; flex:1; }
+.guide-badge { font-size:9px; font-weight:700; padding:2px 7px; border-radius:20px; }
+.guide-sub { font-size:11px; color:var(--muted); line-height:1.5; }
+.guide-meta { display:flex; gap:10px; margin-top:4px; }
+.guide-meta span { font-size:10px; color:var(--muted); font-weight:500; }
+.guide-meta b { color:var(--text); font-weight:600; }
+
+.stat-2col { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
+.stat-box { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; box-shadow:var(--shadow); }
+.stat-box .sb-i { font-size:20px; }
+.stat-box .sb-v { font-size:22px; font-weight:700; margin-top:6px; }
+.stat-box .sb-l { font-size:10px; color:var(--muted); font-weight:500; margin-top:2px; }
+
+
+/* custom entry row */
+.custom-row { display:flex; align-items:center; gap:10px; padding:10px 0 4px; border-top:1px dashed var(--border); margin-top:6px; }
+.custom-row .cr-icon { font-size:16px; flex-shrink:0; }
+.custom-row .cr-lbl { font-size:12px; font-weight:600; color:var(--muted); flex:1; cursor:pointer; }
+.custom-row .cr-lbl:hover { color:var(--accent); }
+.custom-entry { display:none; padding:10px 0 4px; }
+.custom-entry.open { display:block; }
+.custom-entry input { width:100%; border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-family:'Inter',sans-serif; font-size:13px; background:var(--bg); outline:none; margin-bottom:8px; }
+.custom-entry input:focus { border-color:var(--accent); }
+.custom-macro-row { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:6px; margin-bottom:8px; }
+.custom-macro-row input { margin-bottom:0; text-align:center; }
+.custom-macro-lbl { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:6px; margin-bottom:4px; }
+.custom-macro-lbl span { font-size:9px; font-weight:600; color:var(--muted); text-align:center; }
+.btn-log { background:var(--accent); color:white; border:none; border-radius:8px; padding:8px 14px; font-family:'Inter',sans-serif; font-size:12px; font-weight:600; cursor:pointer; width:100%; }
+.btn-log:hover { opacity:.9; }
+.btn-clear { background:none; border:1px solid var(--border); border-radius:8px; padding:6px 10px; font-family:'Inter',sans-serif; font-size:11px; font-weight:500; color:var(--muted); cursor:pointer; margin-top:4px; width:100%; }
+/* per-meal macro bar */
+.meal-macro-bar { display:flex; gap:6px; padding:8px 14px; background:var(--bg); border-top:1px solid var(--border); }
+.mmb-item { flex:1; text-align:center; }
+.mmb-val { font-size:13px; font-weight:700; }
+.mmb-key { font-size:9px; color:var(--muted); font-weight:500; margin-top:1px; }
+.custom-tag-inline { background:#FFF9E6; color:#B54708; border:1px solid #FEC84B; padding:1px 7px; border-radius:20px; font-size:9px; font-weight:700; }
+
+
+/* ── ADMIN PAGE ── */
+.admin-section { background:var(--card); border:1px solid var(--border); border-radius:14px; margin-bottom:12px; overflow:hidden; box-shadow:var(--shadow); }
+.admin-sec-hdr { display:flex; align-items:center; justify-content:space-between; padding:13px 14px; cursor:pointer; }
+.admin-sec-hdr h3 { font-size:13px; font-weight:700; }
+.admin-sec-hdr span { font-size:11px; color:var(--muted); }
+.admin-sec-body { display:none; border-top:1px solid var(--border); }
+.admin-sec-body.open { display:block; }
+
+/* set tabs inside admin */
+.set-tabs { display:flex; overflow-x:auto; padding:10px 14px 0; gap:6px; }
+.set-tab { flex-shrink:0; padding:5px 12px; border-radius:20px; border:1px solid var(--border); background:var(--bg); font-size:11px; font-weight:600; cursor:pointer; color:var(--muted); transition:all .15s; }
+.set-tab.on { background:var(--accent); color:white; border-color:var(--accent); }
+
+/* item list */
+.admin-items { padding:10px 14px 14px; }
+.admin-item { display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid var(--border); }
+.admin-item:last-child { border-bottom:none; }
+.admin-item-name { flex:1; font-size:12px; font-weight:600; min-width:0; }
+.admin-item-cal { font-size:11px; color:var(--muted); white-space:nowrap; }
+.admin-item-btns { display:flex; gap:4px; flex-shrink:0; }
+.ai-btn { border:1px solid var(--border); background:var(--bg); border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif; }
+.ai-btn.edit { color:var(--blue); border-color:#BFDBFE; background:#EFF6FF; }
+.ai-btn.del  { color:var(--accent); border-color:#FECDD3; background:#FFF0F2; }
+.ai-btn.add  { color:var(--green); border-color:#A6F4C5; background:#ECFDF3; }
+
+/* admin edit modal */
+.adm-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:300; align-items:flex-end; justify-content:center; }
+.adm-modal-overlay.open { display:flex; }
+.adm-modal { background:white; border-radius:20px 20px 0 0; padding:20px 18px 28px; width:100%; max-width:480px; }
+.adm-modal h3 { font-size:16px; font-weight:700; margin-bottom:14px; }
+.adm-field { margin-bottom:12px; }
+.adm-field label { display:block; font-size:11px; font-weight:700; color:var(--muted); margin-bottom:4px; text-transform:uppercase; letter-spacing:.3px; }
+.adm-field input, .adm-field textarea { width:100%; border:1px solid var(--border); border-radius:9px; padding:9px 11px; font-family:'Inter',sans-serif; font-size:13px; background:var(--bg); outline:none; }
+.adm-field input:focus, .adm-field textarea:focus { border-color:var(--accent); }
+.adm-field textarea { resize:vertical; min-height:60px; }
+.adm-macro-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.adm-macro-grid .adm-field { margin-bottom:0; }
+.adm-tag-hint { font-size:10px; color:var(--muted); margin-top:4px; }
+.adm-btns { display:flex; gap:8px; margin-top:16px; }
+.adm-save { flex:1; background:var(--accent); color:white; border:none; border-radius:10px; padding:12px; font-size:13px; font-weight:700; cursor:pointer; font-family:'Inter',sans-serif; }
+.adm-cancel { background:var(--bg); color:var(--muted); border:1px solid var(--border); border-radius:10px; padding:12px 16px; font-size:13px; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif; }
+.adm-danger { background:#FFF0F2; color:var(--accent); border:1px solid #FECDD3; border-radius:10px; padding:12px; font-size:13px; font-weight:700; cursor:pointer; font-family:'Inter',sans-serif; margin-top:8px; width:100%; }
+
+/* admin banner */
+.admin-banner { background:linear-gradient(135deg,#1D4ED8,#7C3AED); border-radius:14px; padding:16px; color:white; margin-bottom:12px; }
+.admin-banner h2 { font-size:15px; font-weight:700; }
+.admin-banner p { font-size:11px; opacity:.85; margin-top:4px; line-height:1.5; }
+.admin-reset-btn { margin-top:10px; background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.4); color:white; border-radius:8px; padding:7px 14px; font-size:11px; font-weight:700; cursor:pointer; font-family:'Inter',sans-serif; }
+
+.tip-box { background:var(--amber-light); border:1px solid #FEC84B; border-radius:12px; padding:12px 14px; font-size:12px; font-weight:500; color:#7A2E0E; margin-top:12px; line-height:1.5; }
+</style>
+
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-row">
+    <div><h1>💗 Prachi's Heart Plan</h1><p>30-day cholesterol management</p></div>
+    <div class="xp-pill" id="xp-pill">⭐ 0 XP</div>
+  </div>
+</div>
+
+<!-- TODAY -->
+
+<div class="pg on" id="pg-today">
+
+  <div class="day-bar">
+    <button class="day-arr" onclick="go(-1)">‹</button>
+    <div class="day-mid">
+      <div class="dn" id="day-num">Day 1</div>
+      <div class="dd" id="day-date">—</div>
+    </div>
+    <button class="day-arr" onclick="go(1)">›</button>
+  </div>
+
+  <div class="pills">
+    <div class="pill"><div class="pv" id="p-cal" style="color:#E8435A">0</div><div class="pk">kcal / 1650</div><div class="pill-bar"><div class="pill-fill" id="pf-cal" style="background:#E8435A;width:0%"></div></div></div>
+    <div class="pill"><div class="pv" id="p-prot" style="color:#1D4ED8">0g</div><div class="pk">protein / 75g</div><div class="pill-bar"><div class="pill-fill" id="pf-prot" style="background:#1D4ED8;width:0%"></div></div></div>
+    <div class="pill"><div class="pv" id="p-fib" style="color:#039855">0g</div><div class="pk">fiber / 35g</div><div class="pill-bar"><div class="pill-fill" id="pf-fib" style="background:#039855;width:0%"></div></div></div>
+  </div>
+
+  <div class="ghiya">
+    <div style="font-size:32px">🥤</div>
+    <div class="ghiya-txt"><h3>Morning Ghiya Juice</h3><p>7:00 AM · Empty stomach · ~25 kcal · Lowers BP + cholesterol</p></div>
+    <div class="ghiya-check" id="j-check" onclick="togJuice()">○</div>
+  </div>
+
+  <div id="meal-sections"></div>
+
+  <div class="sec-lbl">🎒 Office snack options (3–4 PM)</div>
+  <div class="office-snacks" id="office-snacks"></div>
+
+</div>
+
+<!-- CALENDAR -->
+
+<div class="pg" id="pg-cal">
+  <div class="cal-grid" id="cal-grid"></div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;box-shadow:var(--shadow)">
+    <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px">Day <span id="cal-num">1</span> · <span id="cal-date2">—</span></div>
+    <div id="cal-detail"></div>
+  </div>
+</div>
+
+<!-- GUIDES -->
+
+<div class="pg" id="pg-guide">
+
+  <div class="sec-lbl">🫓 Which roti should you eat?</div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;box-shadow:var(--shadow);margin-bottom:14px">
+    <div id="roti-list"></div>
+    <div class="tip-box">💡 Start simple: mix 50% regular atta + 50% jowar atta. Barely any taste difference but fiber nearly doubles. Once comfortable, switch to 100% jowar or try khapli atta.</div>
+  </div>
+
+  <div class="sec-lbl">💪 Protein sources ranked</div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;box-shadow:var(--shadow);margin-bottom:14px">
+    <div id="protein-list"></div>
+  </div>
+
+  <div class="sec-lbl">❌ Foods to avoid</div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;box-shadow:var(--shadow)">
+    <div id="avoid-list"></div>
+  </div>
+
+</div>
+
+<!-- STATS -->
+
+<div class="pg" id="pg-stats">
+  <div style="background:linear-gradient(135deg,#E8435A,#F472B6);border-radius:16px;padding:20px;color:white;text-align:center;margin-bottom:14px;box-shadow:var(--shadow-md)">
+    <div style="font-size:52px;font-weight:700;line-height:1">66</div>
+    <div style="font-size:13px;opacity:.9;margin-top:6px;font-weight:600">Heart Health Score (Jun 2026 Report)</div>
+    <div style="font-size:11px;opacity:.75;margin-top:4px">LDL: 175 mg/dL → Target: &lt;100 mg/dL</div>
+  </div>
+  <div class="stat-2col">
+    <div class="stat-box"><div class="sb-i">🏆</div><div class="sb-v" id="st-xp" style="color:#E8435A">0</div><div class="sb-l">Total XP</div></div>
+    <div class="stat-box"><div class="sb-i">🔥</div><div class="sb-v" id="st-str" style="color:#F39C12">0</div><div class="sb-l">Day streak</div></div>
+    <div class="stat-box"><div class="sb-i">✅</div><div class="sb-v" id="st-ml" style="color:#039855">0</div><div class="sb-l">Meals logged</div></div>
+    <div class="stat-box"><div class="sb-i">🥤</div><div class="sb-v" id="st-jd" style="color:#039855">0</div><div class="sb-l">Ghiya juice days</div></div>
+  </div>
+</div>
+
+<!-- ADMIN PAGE -->
+
+<div class="pg" id="pg-admin">
+  <div class="admin-banner">
+    <h2>⚙️ Menu Editor</h2>
+    <p>Edit, add or delete any meal item from any category. Changes save instantly and persist across sessions.</p>
+    <button class="admin-reset-btn" onclick="adminReset()">↺ Reset all to defaults</button>
+  </div>
+
+  <div class="admin-section" id="adm-sec-breakfast">
+    <div class="admin-sec-hdr" onclick="toggleAdminSec('breakfast')">
+      <h3>🍳 Breakfast</h3><span id="adm-cnt-breakfast">— items</span>
+    </div>
+    <div class="admin-sec-body" id="adm-body-breakfast">
+      <div class="set-tabs" id="adm-tabs-breakfast"></div>
+      <div class="admin-items" id="adm-items-breakfast"></div>
+      <div style="padding:0 14px 14px"><button class="ai-btn add" style="width:100%;padding:8px" onclick="openAdminAdd('breakfast')">+ Add new breakfast option</button></div>
+    </div>
+  </div>
+
+  <div class="admin-section" id="adm-sec-morning_snack">
+    <div class="admin-sec-hdr" onclick="toggleAdminSec('morning_snack')">
+      <h3>🍏 Morning Snack</h3><span id="adm-cnt-morning_snack">— items</span>
+    </div>
+    <div class="admin-sec-body" id="adm-body-morning_snack">
+      <div class="set-tabs" id="adm-tabs-morning_snack"></div>
+      <div class="admin-items" id="adm-items-morning_snack"></div>
+      <div style="padding:0 14px 14px"><button class="ai-btn add" style="width:100%;padding:8px" onclick="openAdminAdd('morning_snack')">+ Add new snack option</button></div>
+    </div>
+  </div>
+
+  <div class="admin-section" id="adm-sec-lunch">
+    <div class="admin-sec-hdr" onclick="toggleAdminSec('lunch')">
+      <h3>🍽️ Lunch</h3><span id="adm-cnt-lunch">— items</span>
+    </div>
+    <div class="admin-sec-body" id="adm-body-lunch">
+      <div class="set-tabs" id="adm-tabs-lunch"></div>
+      <div class="admin-items" id="adm-items-lunch"></div>
+      <div style="padding:0 14px 14px"><button class="ai-btn add" style="width:100%;padding:8px" onclick="openAdminAdd('lunch')">+ Add new lunch option</button></div>
+    </div>
+  </div>
+
+  <div class="admin-section" id="adm-sec-evening_snack">
+    <div class="admin-sec-hdr" onclick="toggleAdminSec('evening_snack')">
+      <h3>☕ Evening Snack / Chilla</h3><span id="adm-cnt-evening_snack">— items</span>
+    </div>
+    <div class="admin-sec-body" id="adm-body-evening_snack">
+      <div class="set-tabs" id="adm-tabs-evening_snack"></div>
+      <div class="admin-items" id="adm-items-evening_snack"></div>
+      <div style="padding:0 14px 14px"><button class="ai-btn add" style="width:100%;padding:8px" onclick="openAdminAdd('evening_snack')">+ Add new evening snack</button></div>
+    </div>
+  </div>
+
+  <div class="admin-section" id="adm-sec-dinner">
+    <div class="admin-sec-hdr" onclick="toggleAdminSec('dinner')">
+      <h3>🌙 Dinner</h3><span id="adm-cnt-dinner">— items</span>
+    </div>
+    <div class="admin-sec-body" id="adm-body-dinner">
+      <div class="set-tabs" id="adm-tabs-dinner"></div>
+      <div class="admin-items" id="adm-items-dinner"></div>
+      <div style="padding:0 14px 14px"><button class="ai-btn add" style="width:100%;padding:8px" onclick="openAdminAdd('dinner')">+ Add new dinner option</button></div>
+    </div>
+  </div>
+
+  <div class="admin-section" id="adm-sec-office">
+    <div class="admin-sec-hdr" onclick="toggleAdminSec('office')">
+      <h3>🎒 Office Snacks</h3><span id="adm-cnt-office">— items</span>
+    </div>
+    <div class="admin-sec-body" id="adm-body-office">
+      <div class="admin-items" id="adm-items-office"></div>
+      <div style="padding:0 14px 14px"><button class="ai-btn add" style="width:100%;padding:8px" onclick="openAdminAdd('office')">+ Add new office snack</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN EDIT MODAL -->
+
+<div class="adm-modal-overlay" id="adm-modal">
+  <div class="adm-modal">
+    <h3 id="adm-modal-title">Edit item</h3>
+    <div class="adm-field">
+      <label>Name / Description</label>
+      <textarea id="adm-f-name" rows="2" placeholder="e.g. Moong dal chilla (2 nos)"></textarea>
+    </div>
+    <div class="adm-macro-grid">
+      <div class="adm-field"><label>Calories</label><input type="number" id="adm-f-cal" placeholder="200"></div>
+      <div class="adm-field"><label>Protein (g)</label><input type="number" id="adm-f-prot" placeholder="12"></div>
+      <div class="adm-field"><label>Fiber (g)</label><input type="number" id="adm-f-fib" placeholder="5"></div>
+      <div class="adm-field"><label>Carbs (g)</label><input type="number" id="adm-f-carbs" placeholder="30"></div>
+    </div>
+    <div class="adm-field" id="adm-f-tags-wrap">
+      <label>Tags (comma separated)</label>
+      <input type="text" id="adm-f-tags" placeholder="Zero cholesterol, 10 mins, High protein">
+      <div class="adm-tag-hint">Each tag will appear as a label on the item</div>
+    </div>
+    <div class="adm-field" id="adm-f-recipe-wrap" style="display:none">
+      <label>Recipe (optional)</label>
+      <textarea id="adm-f-recipe" rows="3" placeholder="Step by step instructions..."></textarea>
+    </div>
+    <div class="adm-field" id="adm-f-tip-wrap">
+      <label>Heart tip / note</label>
+      <textarea id="adm-f-tip" rows="2" placeholder="Why is this good for cholesterol?"></textarea>
+    </div>
+    <div class="adm-btns">
+      <button class="adm-cancel" onclick="closeAdmModal()">Cancel</button>
+      <button class="adm-save" onclick="saveAdmItem()">Save changes</button>
+    </div>
+    <button class="adm-danger" id="adm-delete-btn" onclick="deleteAdmItem()" style="display:none">🗑 Delete this item</button>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-item on" onclick="showPg('today',this)"><span class="nav-icon">🏠</span>Today</button>
+  <button class="nav-item" onclick="showPg('cal',this)"><span class="nav-icon">📅</span>30 Days</button>
+  <button class="nav-item" onclick="showPg('guide',this)"><span class="nav-icon">📖</span>Guide</button>
+  <button class="nav-item" onclick="showPg('stats',this)"><span class="nav-icon">❤️</span>Stats</button>
+  <button class="nav-item" onclick="showPg('admin',this)"><span class="nav-icon">⚙️</span>Edit</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  ALL FOOD DATA
+// ═══════════════════════════════════════════════════════
+
+// Each meal slot gets a rotating SET of options.
+// We have 6 breakfast sets, 6 lunch sets, 6 dinner sets.
+// Day 1 → set 0, Day 2 → set 1 … Day 7 → set 0 again.
+
+const BREAKFAST_SETS = [
+  [ // Set A
+    { name:"Egg white scramble + whole wheat toast", cal:280, prot:22, fib:4, chol:0, tags:[{t:"Zero cholesterol",c:"g"},{t:"5 mins",c:"b"}] },
+    { name:"3 egg whites bhurji (no roti)", cal:200, prot:22, fib:2, chol:0, tags:[{t:"Lightest option",c:"b"},{t:"Zero cholesterol",c:"g"}] },
+    { name:"Greek yogurt (150g) + apple + 5 walnuts", cal:260, prot:20, fib:3, chol:10, tags:[{t:"Zero cooking",c:"g"},{t:"High protein",c:"b"}] },
+  ],
+  [ // Set B
+    { name:"Masala omelette (1 egg + 1 white) + roti", cal:320, prot:22, fib:3, chol:186, tags:[{t:"Use 1 yolk max 2x/week",c:"a"},{t:"5 mins",c:"b"}] },
+    { name:"Egg white bhurji + 1 whole wheat roti", cal:300, prot:22, fib:3, chol:0, tags:[{t:"Zero cholesterol",c:"g"}] },
+    { name:"Greek yogurt + Goat Life oats (overnight)", cal:340, prot:18, fib:6, chol:5, tags:[{t:"Prep night before",c:"b"},{t:"Beta-glucan",c:"g"}] },
+  ],
+  [ // Set C
+    { name:"2 boiled egg whites + 1 whole egg + apple", cal:250, prot:20, fib:4, chol:186, tags:[{t:"Boil night before",c:"b"},{t:"Use 1 yolk max 2x/week",c:"a"}] },
+    { name:"Egg white toast sandwich (2 slices)", cal:270, prot:20, fib:3, chol:0, tags:[{t:"Zero cholesterol",c:"g"},{t:"5 mins",c:"b"}] },
+    { name:"Low-fat paneer bhurji (80g) + toast", cal:310, prot:22, fib:2, chol:18, tags:[{t:"14g protein/100g paneer",c:"b"},{t:"Buy low-fat only",c:"a"}] },
+  ],
+  [ // Set D
+    { name:"Egg white scramble + 1 jowar roti", cal:290, prot:22, fib:5, chol:0, tags:[{t:"Jowar has beta-glucan",c:"g"},{t:"Zero cholesterol",c:"g"}] },
+    { name:"3 egg whites bhurji + 1 whole wheat roti", cal:300, prot:22, fib:3, chol:0, tags:[{t:"Zero cholesterol",c:"g"}] },
+    { name:"Greek yogurt (150g) + banana + flaxseed", cal:270, prot:18, fib:4, chol:10, tags:[{t:"Zero cooking",c:"g"},{t:"Omega-3",c:"b"}] },
+  ],
+  [ // Set E
+    { name:"Omelette (2 whites + 1 yolk) + roti", cal:330, prot:20, fib:3, chol:186, tags:[{t:"1 yolk max 2x/week",c:"a"},{t:"5 mins",c:"b"}] },
+    { name:"Egg white + low-fat paneer bhurji (50g+2 whites)", cal:280, prot:24, fib:2, chol:10, tags:[{t:"Highest protein combo",c:"b"}] },
+    { name:"Low-fat curd (100g) + fruit + 5 walnuts", cal:200, prot:10, fib:3, chol:8, tags:[{t:"Zero cooking",c:"g"},{t:"Probiotics",c:"b"}] },
+  ],
+  [ // Set F
+    { name:"3 egg whites scrambled + 2 wheat bread slices", cal:280, prot:22, fib:3, chol:0, tags:[{t:"Zero cholesterol",c:"g"},{t:"5 mins",c:"b"}] },
+    { name:"Egg white bhurji (3 whites) + jowar roti", cal:290, prot:22, fib:5, chol:0, tags:[{t:"Jowar = extra fiber",c:"g"},{t:"Zero cholesterol",c:"g"}] },
+    { name:"Greek yogurt parfait: yogurt + oats + fruit", cal:320, prot:19, fib:5, chol:8, tags:[{t:"Zero cooking",c:"g"},{t:"Beta-glucan",c:"g"}] },
+  ],
+];
+
+const LUNCH_SETS = [
+  [ // Set A
+    { name:"Goat Life Tiramisu Oats (80g) + 5 walnuts", cal:420, prot:16, fib:9, chol:0, tags:[{t:"LDL fighter #1",c:"g"},{t:"3 mins",c:"b"}] },
+    { name:"Dal + brown rice + any sabzi (order/home)", cal:430, prot:16, fib:8, chol:0, tags:[{t:"Daily dal = key habit",c:"g"}] },
+    { name:"Rajma + 2 whole wheat rotis (order)", cal:460, prot:20, fib:12, chol:0, tags:[{t:"Highest fiber lunch",c:"g"},{t:"↓LDL 6%",c:"g"}] },
+  ],
+  [ // Set B
+    { name:"Goat Life Oats + low-fat curd (100g)", cal:410, prot:18, fib:9, chol:5, tags:[{t:"Probiotics + beta-glucan",c:"g"},{t:"3 mins",c:"b"}] },
+    { name:"Chana masala + 2 rotis (order/home)", cal:450, prot:18, fib:10, chol:0, tags:[{t:"Plant sterols",c:"g"},{t:"↓LDL",c:"g"}] },
+    { name:"Greek yogurt bowl + fruit + walnuts + oats", cal:380, prot:22, fib:6, chol:10, tags:[{t:"High protein",c:"b"},{t:"Zero cooking",c:"g"}] },
+  ],
+  [ // Set C
+    { name:"Goat Life Oats (80g) + banana", cal:430, prot:15, fib:10, chol:0, tags:[{t:"Pectin + beta-glucan",c:"g"},{t:"3 mins",c:"b"}] },
+    { name:"Dal + 2 whole wheat rotis + salad (home/order)", cal:420, prot:16, fib:9, chol:0, tags:[{t:"Classic heart lunch",c:"g"}] },
+    { name:"Palak paneer (100g) + 2 rotis (order)", cal:460, prot:18, fib:6, chol:20, tags:[{t:"Max 1–2x/week",c:"a"},{t:"Ask: no cream",c:"a"}] },
+  ],
+  [ // Set D
+    { name:"Goat Life Oats + Greek yogurt (100g)", cal:420, prot:20, fib:9, chol:8, tags:[{t:"Protein + fiber combo",c:"g"},{t:"3 mins",c:"b"}] },
+    { name:"Moong dal khichdi + low-fat curd (home)", cal:400, prot:15, fib:7, chol:5, tags:[{t:"Easy leftover meal",c:"b"}] },
+    { name:"Chole + 2 jowar rotis (order/home)", cal:460, prot:18, fib:11, chol:0, tags:[{t:"Jowar roti > wheat roti",c:"g"},{t:"↓LDL",c:"g"}] },
+  ],
+  [ // Set E
+    { name:"Goat Life Oats + flaxseed + apple", cal:440, prot:15, fib:11, chol:0, tags:[{t:"Omega-3 + pectin + beta-glucan",c:"g"},{t:"3 mins",c:"b"}] },
+    { name:"Paneer tikka (80g grilled) + dal + roti", cal:480, prot:26, fib:6, chol:18, tags:[{t:"Grilled not fried",c:"b"},{t:"High protein",c:"b"}] },
+    { name:"Sabzi + dal + 2 rotis (home dabba)", cal:420, prot:16, fib:9, chol:0, tags:[{t:"Classic dabba",c:"b"},{t:"No butter on rotis",c:"a"}] },
+  ],
+  [ // Set F
+    { name:"Goat Life Oats + warm water + walnuts", cal:400, prot:15, fib:9, chol:0, tags:[{t:"Simplest oats prep",c:"b"},{t:"LDL fighter",c:"g"}] },
+    { name:"Rajma / chole + jowar roti (order)", cal:470, prot:20, fib:12, chol:0, tags:[{t:"Highest fiber combo",c:"g"},{t:"↓LDL 6%",c:"g"}] },
+    { name:"Greek yogurt (200g) + chana + fruit", cal:360, prot:24, fib:7, chol:10, tags:[{t:"High protein",c:"b"},{t:"Zero cooking",c:"g"}] },
+  ],
+];
+
+// 10 sabjis that are heart-healthy (low sat fat, high fiber/micronutrients)
+// Rotating across all 6 dinner sets so every few days you get a different sabzi option
+const SABJIS = [
+  { name:"Palak (spinach) sabzi", cal:80, prot:4, fib:3, note:"Plant sterols block LDL absorption · Iron boost" },
+  { name:"Baingan bharta (roasted)", cal:90, prot:2, fib:4, note:"Roasted not fried · Nasunin in aubergine is antioxidant" },
+  { name:"Bhindi (okra) sabzi", cal:75, prot:2, fib:5, note:"Highest fiber sabzi · Okra's mucilage binds LDL directly" },
+  { name:"Lauki (ghiya) sabzi", cal:60, prot:1, fib:2, note:"Same veggie as your morning juice · Very light on digestion" },
+  { name:"Methi (fenugreek) sabzi", cal:70, prot:3, fib:3, note:"Clinically lowers LDL + blood sugar · Use fresh or dried" },
+  { name:"Gajar-matar (carrot + peas)", cal:100, prot:4, fib:5, note:"Beta-carotene + fiber combo · Good for inflammation" },
+  { name:"Shimla mirch (capsicum) sabzi", cal:65, prot:2, fib:3, note:"Vit C protects LDL from oxidizing · Low calorie" },
+  { name:"Torai (ridge gourd) sabzi", cal:55, prot:1, fib:2, note:"One of the lowest calorie sabjis · Good for weight management" },
+  { name:"Sautéed paneer + spinach (low-fat, 80g)", cal:180, prot:14, fib:3, note:"Protein + plant sterols · Low-fat paneer + 1 tsp oil only" },
+  { name:"Aloo-gobhi (dry, minimal oil)", cal:130, prot:3, fib:4, note:"Use 1 tsp oil only · Gobhi has sulforaphane for heart health" },
+];
+
+const DINNER_SETS = [
+  [ // Set A — Sabjis: Palak, Bhindi
+    { name:"Dal tadka + 2 whole wheat rotis + salad", cal:400, prot:17, fib:9, chol:0, tags:[{t:"Daily dal = #1 habit",c:"g"}] },
+    { name:"Chana masala + 2 rotis + Greek yogurt raita", cal:470, prot:22, fib:12, chol:8, tags:[{t:"Highest fiber dinner",c:"g"},{t:"Extra protein from yogurt",c:"b"}] },
+    { name:"Sautéed low-fat paneer (100g) + moong dal + 2 rotis", cal:480, prot:26, fib:7, chol:20, tags:[{t:"1 tsp oil only",c:"a"},{t:"Low-fat paneer only",c:"a"}] },
+    { name:"Dal tadka + palak sabzi + 2 jowar rotis", cal:450, prot:18, fib:12, chol:0, tags:[{t:"Plant sterols from palak",c:"g"},{t:"Jowar = beta-glucan",c:"g"}] },
+    { name:"Toor dal + bhindi sabzi + 2 rotis", cal:430, prot:17, fib:13, chol:0, tags:[{t:"Bhindi binds LDL directly",c:"g"},{t:"Highest fiber combo",c:"g"}] },
+    { name:"Quinoa veggie bowl + dal soup", cal:440, prot:18, fib:8, chol:0, tags:[{t:"Complete plant protein",c:"b"},{t:"All 9 amino acids",c:"g"}] },
+    { name:"Soya chunks curry + 2 rotis + salad", cal:450, prot:28, fib:7, chol:0, tags:[{t:"28g protein — highest",c:"b"},{t:"Soy ↓LDL 4–6%",c:"g"}] },
+  ],
+  [ // Set B — Sabjis: Baingan bharta, Methi
+    { name:"Moong dal + 2 jowar rotis + salad", cal:400, prot:17, fib:10, chol:0, tags:[{t:"Jowar boosts fiber",c:"g"},{t:"Moong = 15 min cook",c:"b"}] },
+    { name:"Egg white bhurji (3 whites) + dal + 2 rotis", cal:410, prot:28, fib:8, chol:0, tags:[{t:"Zero cholesterol",c:"g"},{t:"High protein",c:"b"}] },
+    { name:"Rajma + 2 rotis + low-fat curd", cal:450, prot:20, fib:12, chol:5, tags:[{t:"Best fiber dinner",c:"g"}] },
+    { name:"Moong dal + baingan bharta + 2 rotis", cal:440, prot:18, fib:11, chol:0, tags:[{t:"Roasted baingan = antioxidant",c:"g"},{t:"No frying needed",c:"b"}] },
+    { name:"Dal + methi sabzi + 2 whole wheat rotis", cal:430, prot:18, fib:11, chol:0, tags:[{t:"Methi ↓LDL clinically",c:"g"},{t:"Use fresh or kasuri methi",c:"b"}] },
+    { name:"Quinoa khichdi (quinoa + moong dal) + raita", cal:420, prot:20, fib:7, chol:5, tags:[{t:"Higher protein than rice khichdi",c:"b"},{t:"Complete protein",c:"g"}] },
+    { name:"Soya keema (granules) + dal + 2 rotis", cal:460, prot:30, fib:8, chol:0, tags:[{t:"Highest protein dinner",c:"b"},{t:"Soy ↓LDL",c:"g"}] },
+  ],
+  [ // Set C — Sabjis: Gajar-matar, Shimla mirch
+    { name:"Toor dal + 2 whole wheat rotis + salad", cal:400, prot:16, fib:8, chol:0, tags:[{t:"Heart staple",c:"g"}] },
+    { name:"Low-fat paneer bhurji (100g) + moong dal + 2 rotis", cal:470, prot:28, fib:8, chol:20, tags:[{t:"Highest protein dinner",c:"b"},{t:"Low-fat paneer only",c:"a"}] },
+    { name:"Chana + 2 khapli wheat rotis + Greek yogurt raita", cal:460, prot:20, fib:13, chol:8, tags:[{t:"Khapli = double fiber",c:"g"},{t:"Soak chana overnight",c:"b"}] },
+    { name:"Dal + gajar-matar sabzi + 2 rotis", cal:440, prot:18, fib:12, chol:0, tags:[{t:"Beta-carotene + fiber",c:"g"},{t:"Anti-inflammatory",c:"g"}] },
+    { name:"Moong dal + shimla mirch sabzi + 2 jowar rotis", cal:420, prot:17, fib:10, chol:0, tags:[{t:"Vit C protects LDL",c:"g"},{t:"Jowar = beta-glucan",c:"g"}] },
+    { name:"Quinoa + roasted veg + chickpeas bowl", cal:450, prot:18, fib:10, chol:0, tags:[{t:"Complete plant protein",c:"b"},{t:"High fiber",c:"g"}] },
+    { name:"Soya chunks + palak curry + 2 rotis", cal:440, prot:26, fib:9, chol:0, tags:[{t:"Soy + spinach plant sterols",c:"g"},{t:"Zero cholesterol",c:"g"}] },
+  ],
+  [ // Set D — Sabjis: Lauki, Torai
+    { name:"Masoor dal + 2 rotis + salad", cal:390, prot:17, fib:9, chol:0, tags:[{t:"Iron-rich dal",c:"b"},{t:"Good for your low Hb",c:"g"}] },
+    { name:"Egg white curry (3 whites) + dal + 2 rotis", cal:390, prot:24, fib:7, chol:0, tags:[{t:"Zero cholesterol",c:"g"},{t:"Different texture",c:"b"}] },
+    { name:"Dal khichdi + Greek yogurt raita", cal:400, prot:18, fib:8, chol:8, tags:[{t:"Easy leftover-friendly",c:"b"},{t:"Extra protein from yogurt",c:"b"}] },
+    { name:"Dal + lauki sabzi + 2 rotis", cal:400, prot:16, fib:9, chol:0, tags:[{t:"Same as morning juice veggie",c:"b"},{t:"Very light dinner",c:"g"}] },
+    { name:"Masoor dal + torai (ridge gourd) sabzi + 2 rotis", cal:390, prot:17, fib:9, chol:0, tags:[{t:"Lowest calorie sabzi",c:"g"},{t:"Good for weight",c:"b"}] },
+    { name:"Quinoa + dal + stir-fried veggies", cal:430, prot:18, fib:9, chol:0, tags:[{t:"Complete protein combo",c:"b"},{t:"No roti needed",c:"g"}] },
+    { name:"Tofu bhurji (150g) + 2 rotis + salad", cal:420, prot:22, fib:6, chol:0, tags:[{t:"Soy protein ↓LDL",c:"g"},{t:"Zero cholesterol",c:"g"}] },
+  ],
+  [ // Set E — Sabjis: Aloo-gobhi, Sautéed paneer+palak
+    { name:"Dal tadka + 2 jowar rotis + salad", cal:420, prot:17, fib:11, chol:0, tags:[{t:"Jowar roti = beta-glucan",c:"g"}] },
+    { name:"Paneer tikka (80g grilled) + dal + 2 rotis", cal:460, prot:26, fib:7, chol:18, tags:[{t:"Grilled only",c:"b"},{t:"Max 2x/week",c:"a"}] },
+    { name:"Rajma + 2 khapli rotis + low-fat curd", cal:460, prot:20, fib:14, chol:5, tags:[{t:"Best fiber dinner",c:"g"},{t:"Khapli = double fiber",c:"g"}] },
+    { name:"Dal + aloo-gobhi (dry) + 2 rotis", cal:460, prot:17, fib:11, chol:0, tags:[{t:"1 tsp oil only",c:"a"},{t:"Gobhi = sulforaphane",c:"g"}] },
+    { name:"Moong dal + sautéed paneer-palak (80g) + 2 rotis", cal:480, prot:24, fib:10, chol:16, tags:[{t:"Protein + plant sterols",c:"g"},{t:"Low-fat paneer only",c:"a"}] },
+    { name:"Quinoa pulao + raita + dal soup", cal:440, prot:18, fib:7, chol:5, tags:[{t:"Easy one-pot dinner",c:"b"},{t:"Complete protein",c:"g"}] },
+    { name:"Soya chunks + bhindi curry + 2 jowar rotis", cal:450, prot:26, fib:11, chol:0, tags:[{t:"Protein + LDL-binding fiber",c:"g"},{t:"Jowar = beta-glucan",c:"g"}] },
+  ],
+  [ // Set F — Sabjis: Bhindi, Methi+aloo
+    { name:"Moong dal + 2 rotis + salad", cal:380, prot:16, fib:8, chol:0, tags:[{t:"15 min cook, no soak",c:"b"},{t:"Lightest dal",c:"g"}] },
+    { name:"Low-fat paneer + chole + 2 rotis", cal:490, prot:26, fib:11, chol:18, tags:[{t:"High protein + fiber",c:"b"},{t:"Low-fat paneer only",c:"a"}] },
+    { name:"Order: dal + roti (tired night)", cal:400, prot:15, fib:8, chol:0, tags:[{t:"Ordering is fine!",c:"b"},{t:"Ask: no extra ghee",c:"a"}] },
+    { name:"Dal + bhindi sabzi + 2 rotis", cal:420, prot:17, fib:13, chol:0, tags:[{t:"Bhindi binds LDL",c:"g"},{t:"High fiber sabzi",c:"g"}] },
+    { name:"Toor dal + methi-aloo sabzi + 2 rotis", cal:450, prot:17, fib:10, chol:0, tags:[{t:"Methi ↓LDL",c:"g"},{t:"Minimal potato = ok",c:"b"}] },
+    { name:"Quinoa + moong dal bowl + cucumber raita", cal:420, prot:20, fib:8, chol:5, tags:[{t:"Complete protein",c:"b"},{t:"Light dinner",c:"g"}] },
+    { name:"Soya keema + peas + 2 rotis + salad", cal:460, prot:30, fib:9, chol:0, tags:[{t:"Highest protein option",c:"b"},{t:"Soy ↓LDL",c:"g"}] },
+  ],
+];
+
+const MORNING_SNACKS_SETS = [
+  [
+    { name:"5 walnuts + 1 apple", cal:185, prot:4, fib:4, chol:0, tags:[{t:"↓LDL",c:"g"}] },
+    { name:"30g roasted chana", cal:120, prot:8, fib:5, chol:0, tags:[{t:"Zero cholesterol",c:"g"}] },
+    { name:"1 banana", cal:90, prot:1, fib:3, chol:0, tags:[{t:"Potassium for BP",c:"b"}] },
+  ],
+  [
+    { name:"4 almonds + 1 guava", cal:130, prot:4, fib:5, chol:0, tags:[{t:"↑HDL",c:"g"}] },
+    { name:"Greek yogurt (100g)", cal:100, prot:12, fib:0, chol:6, tags:[{t:"High protein snack",c:"b"}] },
+    { name:"1 pear + 5 walnuts", cal:170, prot:3, fib:5, chol:0, tags:[{t:"Pectin traps LDL",c:"g"}] },
+  ],
+  [
+    { name:"Roasted chana + 1 apple", cal:200, prot:9, fib:7, chol:0, tags:[{t:"Fiber double hit",c:"g"}] },
+    { name:"5 walnuts + 3 dates", cal:180, prot:3, fib:3, chol:0, tags:[{t:"Natural energy",c:"b"}] },
+    { name:"Low-fat curd (100g) + banana", cal:170, prot:9, fib:3, chol:8, tags:[{t:"Probiotics",c:"b"}] },
+  ],
+  [
+    { name:"5 walnuts + 1 orange", cal:160, prot:4, fib:3, chol:0, tags:[{t:"Vit C protects LDL",c:"g"}] },
+    { name:"Greek yogurt (100g) + 5 walnuts", cal:180, prot:14, fib:1, chol:6, tags:[{t:"High protein",c:"b"},{t:"↑HDL",c:"g"}] },
+    { name:"Roasted chana (30g) + apple", cal:200, prot:9, fib:7, chol:0, tags:[{t:"Best fiber snack",c:"g"}] },
+  ],
+  [
+    { name:"1 banana + 1 tsp peanut butter", cal:175, prot:5, fib:3, chol:0, tags:[{t:"Healthy mono fats",c:"b"}] },
+    { name:"4 almonds + 1 guava", cal:130, prot:4, fib:5, chol:0, tags:[{t:"↑HDL",c:"g"}] },
+    { name:"Greek yogurt (100g) + fruit", cal:140, prot:12, fib:2, chol:6, tags:[{t:"High protein",c:"b"}] },
+  ],
+  [
+    { name:"5 walnuts + 1 apple", cal:185, prot:4, fib:4, chol:0, tags:[{t:"↓LDL",c:"g"}] },
+    { name:"Roasted makhana (30g)", cal:110, prot:4, fib:2, chol:0, tags:[{t:"Replace namkeen",c:"b"}] },
+    { name:"Low-fat curd + seasonal fruit", cal:150, prot:9, fib:2, chol:8, tags:[{t:"Probiotics",c:"b"}] },
+  ],
+];
+
+// Evening snack chillas — all take 10–12 mins, minimal ingredients,
+// heart-healthy (high protein/fiber, low sat fat, zero cholesterol)
+// Each set: 1 chilla option + 2 no-cook fallbacks for lazy days
+
+const EVENING_SNACKS_SETS = [
+  [ // Set A
+    {
+      name:"Moong dal chilla (2 nos)",
+      cal:180, prot:12, fib:5, chol:0,
+      tags:[{t:"12g protein",c:"b"},{t:"Zero cholesterol",c:"g"},{t:"10 mins",c:"b"}],
+      recipe:"Soak 50g moong dal 2–4 hrs (or use ready dal flour). Blend into smooth batter. Add chopped onion, green chilli, ginger, coriander, pinch of salt + cumin. Pour on non-stick tawa like a dosa. Cook 3 mins each side with ½ tsp oil. Serve with green chutney.",
+      heartNote:"Moong dal plant sterols block cholesterol absorption. 12g protein with zero cholesterol — better than a biscuit any day!"
+    },
+    { name:"Greek yogurt (150g) plain + 5 walnuts", cal:195, prot:19, fib:1, chol:8, tags:[{t:"High protein",c:"b"},{t:"↓LDL",c:"g"}] },
+    { name:"Roasted makhana (30g) + green tea", cal:120, prot:5, fib:2, chol:0, tags:[{t:"Light + filling",c:"b"}] },
+  ],
+  [ // Set B
+    {
+      name:"Lauki (ghiya) chilla (2 nos)",
+      cal:150, prot:8, fib:4, chol:0,
+      tags:[{t:"Same veggie as morning juice",c:"b"},{t:"Very light",c:"g"},{t:"10 mins",c:"b"}],
+      recipe:"Grate 1 cup lauki (squeeze out water slightly). Mix with 4 tbsp besan, 1 tbsp atta, grated ginger, green chilli, cumin, turmeric, salt. Add a little water to make pourable batter. Cook on non-stick tawa with ½ tsp oil per chilla, 3 mins each side. Serve with curd or chutney.",
+      heartNote:"Lauki is one of the most alkaline vegetables — reduces body acidity which is linked to inflammation. Low calorie, hydrating, and heart-friendly."
+    },
+    { name:"5 walnuts + 2–3 dates", cal:180, prot:3, fib:3, chol:0, tags:[{t:"↓LDL + natural sweet",c:"g"}] },
+    { name:"Greek yogurt (150g) + flaxseed", cal:135, prot:18, fib:1, chol:8, tags:[{t:"Omega-3 + protein",c:"b"}] },
+  ],
+  [ // Set C
+    {
+      name:"Beetroot chilla (2 nos)",
+      cal:170, prot:8, fib:5, chol:0,
+      tags:[{t:"Nitrates lower BP",c:"g"},{t:"Beautiful colour",c:"b"},{t:"12 mins",c:"b"}],
+      recipe:"Grate 1 medium beetroot (raw). Mix with 4 tbsp besan, 1 tbsp semolina (rava), pinch of salt, cumin, chilli flakes, coriander leaves. Add water for pourable batter. Cook on non-stick tawa, ½ tsp oil per chilla, 3 mins each side. The colour is stunning — great mood lifter!",
+      heartNote:"Beetroot nitrates convert to nitric oxide which relaxes blood vessels and directly lowers blood pressure. Besan adds fiber. Zero cholesterol."
+    },
+    { name:"Roasted chana (30g) + green tea", cal:130, prot:8, fib:5, chol:0, tags:[{t:"Fiber + catechins",c:"g"}] },
+    { name:"Greek yogurt (150g) + banana", cal:200, prot:18, fib:2, chol:8, tags:[{t:"High protein",c:"b"}] },
+  ],
+  [ // Set D
+    {
+      name:"Spinach (palak) besan chilla (2 nos)",
+      cal:165, prot:10, fib:5, chol:0,
+      tags:[{t:"Iron + plant sterols",c:"g"},{t:"Zero cholesterol",c:"g"},{t:"10 mins",c:"b"}],
+      recipe:"Blend handful of fresh palak leaves with little water into a puree. Mix into 5 tbsp besan batter with chopped onion, green chilli, cumin, salt. Batter turns beautiful green. Cook on tawa ½ tsp oil per chilla, 3 mins each side. Serve with low-fat curd.",
+      heartNote:"Palak plant sterols directly block LDL absorption. Besan adds soluble fiber. Iron helps your slightly low Hb. Best evening chilla for heart + blood health."
+    },
+    { name:"4 walnuts + 1 guava", cal:155, prot:4, fib:5, chol:0, tags:[{t:"↓LDL + fiber",c:"g"}] },
+    { name:"Greek yogurt (150g) + honey", cal:145, prot:17, fib:0, chol:8, tags:[{t:"High protein",c:"b"}] },
+  ],
+  [ // Set E
+    {
+      name:"Oats & veggie chilla (2 nos)",
+      cal:190, prot:9, fib:6, chol:0,
+      tags:[{t:"Beta-glucan ↓LDL",c:"g"},{t:"Most filling chilla",c:"b"},{t:"12 mins",c:"b"}],
+      recipe:"Grind 3 tbsp rolled oats into coarse flour. Mix with 3 tbsp besan, grated carrot (2 tbsp), finely chopped onion, green chilli, ginger, cumin, turmeric, salt. Add water for batter. Cook on tawa with ½ tsp oil, 3–4 mins each side. Thicker than other chillas — very filling!",
+      heartNote:"Oats beta-glucan directly lowers LDL — even in chilla form! Carrot adds beta-carotene. Most heart-powerful chilla in this list."
+    },
+    { name:"Roasted makhana (30g) + green tea", cal:120, prot:5, fib:2, chol:0, tags:[{t:"Best namkeen swap",c:"b"}] },
+    { name:"Hummus (3 tbsp) + cucumber + carrot sticks", cal:150, prot:5, fib:4, chol:0, tags:[{t:"Chickpea fiber",c:"g"}] },
+  ],
+  [ // Set F
+    {
+      name:"Mixed dal chilla — moong + chana dal (2 nos)",
+      cal:200, prot:14, fib:6, chol:0,
+      tags:[{t:"14g protein",c:"b"},{t:"Highest protein chilla",c:"b"},{t:"12 mins",c:"b"}],
+      recipe:"Soak 30g moong dal + 20g chana dal together for 3–4 hrs (or overnight). Blend into smooth batter with ginger, green chilli, cumin, salt. Add chopped onion, coriander. Cook on non-stick tawa with ½ tsp oil per chilla, 3 mins each side. Crispy outside, soft inside!",
+      heartNote:"Combo dal = higher protein and a wider range of plant sterols. Both dals are soluble fiber champions for LDL reduction. A restaurant-quality snack at home."
+    },
+    { name:"5 walnuts + green tea", cal:130, prot:4, fib:2, chol:0, tags:[{t:"↓LDL + catechins",c:"g"}] },
+    { name:"Greek yogurt (150g) + fruit + flaxseed", cal:180, prot:18, fib:3, chol:8, tags:[{t:"Omega-3 + protein",c:"b"}] },
+  ],
+];
+
+const EXERCISE_LIST = [
+  { name:"Brisk walk", dur:"30 mins", time:"7 AM or 7:30 PM", kcal:150, tip:"Raises HDL up to 10% over 8 weeks" },
+  { name:"Yoga + stretching", dur:"25 mins", time:"7:00 AM", kcal:90, tip:"Lowers cortisol, which raises cholesterol" },
+  { name:"Brisk walk + stairs", dur:"35 mins", time:"7 AM or evening", kcal:165, tip:"Aerobic exercise lowers LDL within 4–6 weeks" },
+  { name:"Light walk (rest day)", dur:"20 mins", time:"After dinner", kcal:70, tip:"20 mins post-dinner lowers post-meal blood fats" },
+  { name:"Brisk walk", dur:"30 mins", time:"7 AM or 7:30 PM", kcal:150, tip:"Consistency > intensity for cholesterol" },
+  { name:"Longer walk or swim", dur:"45 mins", time:"Morning", kcal:210, tip:"Weekend bonus — significantly boosts HDL" },
+  { name:"Rest / gentle stretch", dur:"20 mins", time:"Whenever", kcal:50, tip:"Recovery day. Body needs it to improve." },
+];
+
+const OFFICE_SNACKS = [
+  { e:"🫘", n:"Roasted chana", cal:"120 kcal", tip:"Carry in zip bag · Zero cholesterol · Best daily snack" },
+  { e:"🥜", n:"Walnuts + almonds mix", cal:"180 kcal", tip:"5 walnuts + 4 almonds pre-weighed at home" },
+  { e:"🍿", n:"Roasted makhana", cal:"110 kcal", tip:"Airtight box · Replaces all namkeen" },
+  { e:"🍎", n:"Apple or guava", cal:"80 kcal", tip:"Just put it in your bag · Eat with skin" },
+  { e:"🥣", n:"Greek yogurt cup", cal:"120 kcal", tip:"Buy at office or canteen · Best protein snack" },
+  { e:"🌴", n:"2–3 dates + walnuts", cal:"130 kcal", tip:"Pre-pack at home · Satisfies sweet craving" },
+  { e:"🫛", n:"Edamame (boiled, salted)", cal:"120 kcal", tip:"12g protein · Boil at home, carry in box · Soy lowers LDL by 4–6%" },
+];
+
+const ROTI_GUIDE = [
+  { e:"🥇", n:"Khapli (Emmer) Wheat", ver:"Best", col:"#039855", fiber:"8g/100g", gi:"Low 45", ldl:"↓↓↓", note:"Double fiber of regular atta, lowest GI. Order online or find at organic stores. Worth the effort." },
+  { e:"🥈", n:"Jowar (Sorghum)", ver:"Best", col:"#039855", fiber:"6g/100g", gi:"Low 50", ldl:"↓↓↓", note:"Has beta-glucan like oats — directly lowers LDL! Widely available. Mix 50:50 with regular atta to start." },
+  { e:"🥈", n:"Bajra (Pearl Millet)", ver:"Great", col:"#1D4ED8", fiber:"5g/100g", gi:"Low 55", ldl:"↓↓", note:"High fiber + magnesium for heart. Mix 50:50 with atta. Especially good in winter." },
+  { e:"🥈", n:"Ragi (Finger Millet)", ver:"Great", col:"#1D4ED8", fiber:"4g/100g", gi:"Low 55", ldl:"↓↓", note:"Highest calcium of any grain — great for women. Start 30% ragi + 70% atta, work up." },
+  { e:"🟡", n:"Whole Wheat Atta", ver:"Good", col:"#B54708", fiber:"3g/100g", gi:"Med 60", ldl:"↓", note:"Your current staple. Better than maida. Upgrade to jowar mix when possible." },
+  { e:"🔴", n:"Maida / White Flour", ver:"Avoid", col:"#E8435A", fiber:"1g/100g", gi:"High 80", ldl:"↑↑", note:"High GI spikes blood sugar → liver makes more LDL. No naan, puri, bhatura." },
+];
+
+const PROTEIN_GUIDE = [
+  { e:"🥚", n:"Egg whites (3 nos)", prot:"21g", chol:"0mg", sat:"0g", ver:"Best", col:"#039855", note:"Zero cholesterol, zero sat fat. Eat freely at breakfast + dinner." },
+  { e:"🥣", n:"Greek yogurt (150g)", prot:"18g", chol:"8mg", sat:"1g", ver:"Best", col:"#039855", note:"3x protein of regular curd. Best snack + breakfast protein. Always buy low-fat." },
+  { e:"🫘", n:"Chana / Rajma (1 katori)", prot:"10g", chol:"0mg", sat:"0g", ver:"Best", col:"#039855", note:"Zero cholesterol + 10–12g fiber. Lowers LDL by 5–8% eaten regularly." },
+  { e:"🫘", n:"Dal (1 katori)", prot:"9g", chol:"0mg", sat:"0g", ver:"Best", col:"#039855", note:"Should be in every lunch and dinner. Fiber + protein combo unbeatable for LDL." },
+  { e:"🧀", n:"Low-fat paneer (100g)", prot:"18g", chol:"20mg", sat:"4g", ver:"Good", col:"#1D4ED8", note:"Great protein. Low-fat version only (Amul/Mother Dairy). Sauté, never fry. Max 2–3x/week." },
+  { e:"🫛", n:"Tofu (100g)", prot:"8g", chol:"0mg", sat:"1g", ver:"Good", col:"#1D4ED8", note:"FDA-approved for cholesterol reduction. Worth buying occasionally." },
+  { e:"🥚", n:"Whole egg (1)", prot:"6g", chol:"186mg", sat:"2g", ver:"2x/week max", col:"#B54708", note:"Fine in moderation with FH. Max 2 whole eggs per week. Egg whites all other times." },
+  { e:"🧀", n:"Regular paneer (100g)", prot:"18g", chol:"35mg", sat:"9g", ver:"Limit", col:"#E8435A", note:"High sat fat raises LDL. Always choose low-fat version instead." },
+];
+
+const AVOID_LIST = [
+  { e:"🍟", n:"Fried food", why:"Trans fat = #1 LDL raiser. Samosa, pakora, bhatura, chips." },
+  { e:"🧈", n:"Excess ghee / butter", why:"Max 1 tsp/day. Saturated fat raises LDL more than anything." },
+  { e:"🍪", n:"Biscuits, namkeen, chips", why:"Hidden palm oil + trans fats. Replace with chana / makhana." },
+  { e:"🥛", n:"Full-fat dairy (malai, cream)", why:"Switch to low-fat curd, Greek yogurt, skimmed milk." },
+  { e:"🍞", n:"Maida products", why:"Naan, white bread, puri spike blood sugar → more LDL made." },
+  { e:"🧃", n:"Packaged juices + sugary drinks", why:"Sugar spikes insulin → liver produces more LDL." },
+];
+
+// ═══════════════════════════════════════════════════════
+//  STATE — Firebase + localStorage fallback
+// ═══════════════════════════════════════════════════════
+let D = 0;
+
+// Start from localStorage immediately so UI isn't blank
+let ST = JSON.parse(localStorage.getItem('phq3') || 'null') || {
+  xp:0, streak:0, juiceDays:0, totalMeals:0, days:{}
+};
+
+function getDay(d) {
+  if (!ST.days[d]) ST.days[d] = { sel:{}, juice:false, ex:false, custom:{} };
+  return ST.days[d];
+}
+
+// ── SAVE: write to localStorage immediately, then push to Firebase ──
+function save() {
+  localStorage.setItem('phq3', JSON.stringify(ST));
+  pushToFirebase();
+}
+
+let _pushTimer = null;
+function pushToFirebase() {
+  // Debounce — wait 1.5s after last change to batch writes
+  clearTimeout(_pushTimer);
+  _pushTimer = setTimeout(async () => {
+    if (!window._fbReady || !window._db) return;
+    try {
+      const ref = window._doc(window._db, 'heart_logs', window._USER_ID);
+      await window._setDoc(ref, { data: ST, updated_at: new Date().toISOString() }, { merge: true });
+    } catch(e) {
+      console.warn('Firebase save failed, data safe in localStorage:', e.message);
+    }
+  }, 1500);
+}
+
+// ── LOAD from Firebase on startup, merge with localStorage ──
+async function loadFromFirebase() {
+  if (!window._fbReady || !window._db) return;
+  try {
+    showSyncBanner('Syncing…');
+    const ref = window._doc(window._db, 'heart_logs', window._USER_ID);
+    const snap = await window._getDoc(ref);
+    if (snap.exists()) {
+      const remote = snap.data().data;
+      if (remote) {
+        // Merge: use remote as base, remote XP wins if higher
+        ST = remote;
+        localStorage.setItem('phq3', JSON.stringify(ST));
+        renderDay(); refreshHeader();
+      }
+    }
+    showSyncBanner('✓ Synced', true);
+  } catch(e) {
+    showSyncBanner('Offline — changes saved locally', false, true);
+    console.warn('Firebase load failed:', e.message);
+  }
+}
+
+function showSyncBanner(msg, success=false, warn=false) {
+  let el = document.getElementById('sync-banner');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'sync-banner';
+    el.style.cssText = 'position:fixed;top:56px;left:0;right:0;text-align:center;font-size:11px;font-weight:600;padding:5px;z-index:49;transition:all .3s';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.background = success ? '#ECFDF3' : warn ? '#FFFAEB' : '#EFF6FF';
+  el.style.color = success ? '#027A48' : warn ? '#B54708' : '#1D4ED8';
+  if (success) setTimeout(() => { el.style.opacity='0'; setTimeout(()=>el.remove(),400); }, 2000);
+}
+
+// Fire load after Firebase SDK is ready
+if (window._fbReady) {
+  loadFromFirebase();
+} else {
+  window.addEventListener('fbReady', loadFromFirebase);
+}
+
+function addXP(n, msg) {
+  ST.xp += n; save();
+  showToast(`+${n} XP · ${msg}`);
+  refreshHeader();
+}
+
+function refreshHeader() {
+  document.getElementById('xp-pill').textContent = `⭐ ${ST.xp} XP`;
+  const s = document.getElementById('st-xp'); if(s) s.textContent = ST.xp;
+  const t = document.getElementById('st-str'); if(t) t.textContent = ST.streak;
+  const u = document.getElementById('st-ml'); if(u) u.textContent = ST.totalMeals;
+  const v = document.getElementById('st-jd'); if(v) v.textContent = ST.juiceDays;
+}
+
+// ═══════════════════════════════════════════════════════
+//  GET SETS FOR A DAY
+// ═══════════════════════════════════════════════════════
+function setsForDay(d) {
+  const i = d % 6;
+  return {
+    breakfast: BREAKFAST_SETS[i],
+    morning_snack: MORNING_SNACKS_SETS[i],
+    lunch: LUNCH_SETS[i],
+    evening_snack: EVENING_SNACKS_SETS[i],
+    dinner: DINNER_SETS[i],
+    exercise: EXERCISE_LIST[d % 7],
+  };
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER TODAY
+// ═══════════════════════════════════════════════════════
+const MEAL_CFG = [
+  { key:'breakfast',    label:'Breakfast',      time:'8:00 AM',  dot:'#F97316' },
+  { key:'morning_snack',label:'Morning Snack',  time:'11:00 AM', dot:'#059669' },
+  { key:'lunch',        label:'Lunch',          time:'1:00 PM',  dot:'#2563EB' },
+  { key:'evening_snack',label:'Evening Snack',  time:'4:30 PM',  dot:'#7C3AED' },
+  { key:'dinner',       label:'Dinner',         time:'7:30 PM',  dot:'#E8435A' },
+];
+
+function getMacroForMeal(key, ds, sets) {
+  // Returns {cal, prot, fib, chol, carbs, fat, name, isCustom} for the currently selected/custom meal
+  const custom = ds.custom && ds.custom[key];
+  if (custom) return { ...custom, isCustom: true };
+  const idx = ds.sel[key];
+  if (idx !== undefined && idx !== null) {
+    const m = sets[key] && sets[key][idx];
+    if (m) return { cal:m.cal, prot:m.prot, fib:m.fib, chol:m.chol||0, carbs:m.carbs||0, fat:m.fat||0, name:m.name, isCustom:false };
+  }
+  return null;
+}
+
+function renderDay() {
+  const dt = new Date(); dt.setDate(dt.getDate() + D);
+  document.getElementById('day-num').textContent = `Day ${D+1}`;
+  document.getElementById('day-date').textContent = dt.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short'});
+
+  const ds = getDay(D);
+  if (!ds.custom) ds.custom = {};
+  const sets = setsForDay(D);
+
+  // Juice
+  const jc = document.getElementById('j-check');
+  jc.className = 'ghiya-check' + (ds.juice ? ' on' : '');
+  jc.textContent = ds.juice ? '✓' : '○';
+
+  // Day-level totals
+  let cal=0, prot=0, fib=0;
+  MEAL_CFG.forEach(cfg => {
+    const m = getMacroForMeal(cfg.key, ds, sets);
+    if (m) { cal += m.cal||0; prot += m.prot||0; fib += m.fib||0; }
+  });
+  document.getElementById('p-cal').textContent = cal;
+  document.getElementById('p-prot').textContent = prot + 'g';
+  document.getElementById('p-fib').textContent = fib + 'g';
+  document.getElementById('pf-cal').style.width = Math.min(100,(cal/1650)*100) + '%';
+  document.getElementById('pf-prot').style.width = Math.min(100,(prot/75)*100) + '%';
+  document.getElementById('pf-fib').style.width = Math.min(100,(fib/35)*100) + '%';
+
+  // Meal sections
+  let html = '';
+  MEAL_CFG.forEach(cfg => {
+    const opts = sets[cfg.key] || [];
+    const selIdx = ds.sel[cfg.key];
+    const custom = ds.custom[cfg.key];
+    const hasSelection = selIdx !== undefined && selIdx !== null;
+    const hasCustom = !!custom;
+    const activeMacro = getMacroForMeal(cfg.key, ds, sets);
+
+    // Per-meal macro bar (shown when something is selected)
+    const macroBar = activeMacro
+      ? `<div class="meal-macro-bar">
+          <div class="mmb-item"><div class="mmb-val" style="color:#E8435A">${activeMacro.cal}</div><div class="mmb-key">kcal</div></div>
+          <div class="mmb-item"><div class="mmb-val" style="color:#2563EB">${activeMacro.prot}g</div><div class="mmb-key">protein</div></div>
+          <div class="mmb-item"><div class="mmb-val" style="color:#039855">${activeMacro.fib}g</div><div class="mmb-key">fiber</div></div>
+          <div class="mmb-item"><div class="mmb-val" style="color:#7C3AED">${activeMacro.carbs||'—'}</div><div class="mmb-key">carbs</div></div>
+          <div class="mmb-item"><div class="mmb-val" style="color:#B54708">${activeMacro.fat||'—'}</div><div class="mmb-key">fat</div></div>
+        </div>` : '';
+
+    // Summary label in header
+    let selLabel = '';
+    if (hasCustom) {
+      selLabel = ` <span class="custom-tag-inline">✏️ ${custom.name.split(' ').slice(0,3).join(' ')}…</span>`;
+    } else if (hasSelection && opts[selIdx]) {
+      selLabel = `<span style="font-size:11px;color:var(--green);font-weight:500"> · ${opts[selIdx].name.split(' ').slice(0,4).join(' ')}…</span>`;
+    }
+
+    // Option rows
+    const optsHtml = opts.map((o, i) => {
+      const isSelected = !hasCustom && selIdx === i;
+      const tagsHtml = o.tags.map(t => `<span class="tag tag-${t.c}">${t.t}</span>`).join('');
+      // Recipe block — shown inline when option is selected
+      const recipeHtml = (o.recipe && isSelected) ? `
+        <div style="margin-top:8px;background:#F0FFF4;border:1px solid #A6F4C5;border-radius:10px;padding:10px 12px;">
+          <div style="font-size:10px;font-weight:700;color:#027A48;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">📋 How to make it</div>
+          <div style="font-size:12px;color:#1A4731;font-weight:500;line-height:1.6">${o.recipe}</div>
+        </div>
+        <div style="margin-top:6px;background:#FFF0F2;border:1px solid #FFB3C0;border-radius:10px;padding:8px 12px;font-size:11px;color:#7A1A2E;font-weight:500;line-height:1.5">
+          ❤️ ${o.heartNote}
+        </div>` : '';
+      return `<div class="opt-row" onclick="selectOpt('${cfg.key}',${i})" style="${isSelected ? 'background:#F8FFFB;border-radius:10px;margin:0 -4px;padding-left:4px;padding-right:4px;' : ''}">
+        <div class="opt-radio ${isSelected ? 'on' : ''}"></div>
+        <div class="opt-info">
+          <div class="opt-name">${o.name}</div>
+          <div class="opt-macros">
+            <span class="opt-macro"><b>${o.cal}</b> kcal</span>
+            <span class="opt-macro"><b>${o.prot}g</b> protein</span>
+            <span class="opt-macro"><b>${o.fib}g</b> fiber</span>
+            ${o.carbs ? `<span class="opt-macro"><b>${o.carbs}g</b> carbs</span>` : ''}
+            ${o.fat ? `<span class="opt-macro"><b>${o.fat}g</b> fat</span>` : ''}
+          </div>
+          <div class="opt-tags">${tagsHtml}</div>
+          ${recipeHtml}
+        </div>
+      </div>`;
+    }).join('');
+
+    // Custom entry section
+    const custVal = hasCustom ? custom : {};
+    const customHtml = `
+      <div class="custom-row">
+        <span class="cr-icon">✏️</span>
+        <span class="cr-lbl" onclick="toggleCustomEntry('ce-${cfg.key}')">${hasCustom ? `Logged: <b>${custVal.name}</b>` : 'I ate something else — log it'}</span>
+        ${hasCustom ? `<span style="font-size:10px;color:var(--muted);cursor:pointer" onclick="clearCustom('${cfg.key}')">✕ clear</span>` : ''}
+      </div>
+      <div class="custom-entry ${hasCustom ? '' : ''}" id="ce-${cfg.key}">
+        <input type="text" id="cf-name-${cfg.key}" placeholder="What did you eat? e.g. Poha with chai" value="${custVal.name||''}">
+        <div class="custom-macro-lbl"><span>Calories</span><span>Protein (g)</span><span>Fiber (g)</span><span>Carbs (g)</span></div>
+        <div class="custom-macro-row">
+          <input type="number" id="cf-cal-${cfg.key}" placeholder="350" value="${custVal.cal||''}">
+          <input type="number" id="cf-prot-${cfg.key}" placeholder="12" value="${custVal.prot||''}">
+          <input type="number" id="cf-fib-${cfg.key}" placeholder="4" value="${custVal.fib||''}">
+          <input type="number" id="cf-carbs-${cfg.key}" placeholder="45" value="${custVal.carbs||''}">
+        </div>
+        <button class="btn-log" onclick="logCustom('${cfg.key}')">Log this meal +10 XP</button>
+        ${hasCustom ? `<button class="btn-clear" onclick="clearCustom('${cfg.key}')">Clear & pick from menu instead</button>` : ''}
+      </div>`;
+
+    html += `<div class="meal-sec">
+      <div class="meal-hdr" onclick="toggleMeal('m-${cfg.key}')">
+        <div class="meal-dot" style="background:${cfg.dot}"></div>
+        <div class="meal-lbl">${cfg.label}${selLabel}</div>
+        <div class="meal-time">${cfg.time}</div>
+        <div class="meal-arrow" id="arr-${cfg.key}">›</div>
+      </div>
+      ${macroBar}
+      <div id="m-${cfg.key}" style="display:none">
+        <div class="meal-divider"></div>
+        <div class="meal-body">
+          ${optsHtml}
+          ${customHtml}
+        </div>
+      </div>
+    </div>`;
+  });
+
+  // Exercise
+  const ex = sets.exercise;
+  html += `<div style="margin-top:4px"></div>
+  <div class="ex-card">
+    <div style="font-size:26px">🏃‍♀️</div>
+    <div class="ex-info">
+      <h3>${ex.name} · ${ex.dur}</h3>
+      <p>${ex.time} · ~${ex.kcal} kcal · ${ex.tip}</p>
+    </div>
+    <div class="ex-check ${ds.ex ? 'on' : ''}" onclick="togEx()">${ds.ex ? '✓' : '○'}</div>
+  </div>`;
+
+  document.getElementById('meal-sections').innerHTML = html;
+
+  // Office snacks
+  document.getElementById('office-snacks').innerHTML = OFFICE_SNACKS.map(s =>
+    `<div class="os-card"><div class="oe">${s.e}</div><div class="on2">${s.n}</div><div class="om">${s.cal}</div><div class="ot">${s.tip}</div></div>`
+  ).join('');
+}
+
+function toggleMeal(id) {
+  const el = document.getElementById(id);
+  const key = id.replace('m-','');
+  const arr = document.getElementById('arr-' + key);
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+  arr.classList.toggle('open', !isOpen);
+}
+
+function selectOpt(key, idx) {
+  const ds = getDay(D);
+  if (!ds.custom) ds.custom = {};
+  // Clear any custom entry when picking from menu
+  delete ds.custom[key];
+  const wasSelected = ds.sel[key] === idx;
+  if (wasSelected) {
+    delete ds.sel[key];
+  } else {
+    if (ds.sel[key] === undefined && !ds.custom[key]) {
+      ST.totalMeals++; addXP(10, key.replace(/_/g,' ') + ' logged!');
+    }
+    ds.sel[key] = idx;
+  }
+  save(); renderDay();
+}
+
+function toggleCustomEntry(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
+
+function logCustom(key) {
+  const ds = getDay(D);
+  if (!ds.custom) ds.custom = {};
+  const name = document.getElementById('cf-name-' + key)?.value?.trim();
+  if (!name) { alert('Please enter what you ate!'); return; }
+  const cal   = parseInt(document.getElementById('cf-cal-'  + key)?.value) || 0;
+  const prot  = parseInt(document.getElementById('cf-prot-' + key)?.value) || 0;
+  const fib   = parseInt(document.getElementById('cf-fib-'  + key)?.value) || 0;
+  const carbs = parseInt(document.getElementById('cf-carbs-'+ key)?.value) || 0;
+  // Clear menu selection when logging custom
+  delete ds.sel[key];
+  ds.custom[key] = { name, cal, prot, fib, carbs, fat:0, chol:0 };
+  ST.totalMeals++;
+  addXP(10, 'Custom meal logged!');
+  save(); renderDay();
+}
+
+function clearCustom(key) {
+  const ds = getDay(D);
+  if (!ds.custom) ds.custom = {};
+  delete ds.custom[key];
+  save(); renderDay();
+}
+
+function togJuice() {
+  const ds = getDay(D);
+  ds.juice = !ds.juice;
+  if (ds.juice) { ST.juiceDays++; addXP(15, 'Ghiya juice done!'); }
+  save(); renderDay();
+}
+
+function togEx() {
+  const ds = getDay(D);
+  ds.ex = !ds.ex;
+  if (ds.ex) addXP(15, 'Exercise done!');
+  save(); renderDay();
+}
+
+function go(n) {
+  D = Math.max(0, Math.min(29, D + n));
+  renderDay();
+  renderCal();
+}
+
+// ═══════════════════════════════════════════════════════
+//  CALENDAR
+// ═══════════════════════════════════════════════════════
+function renderCal() {
+  const grid = document.getElementById('cal-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  for (let i = 0; i < 30; i++) {
+    const ds = ST.days[i] || {};
+    const selections = Object.keys(ds.sel || {}).length;
+    const div = document.createElement('div');
+    div.className = 'cal-day' + (i===D?' cur':'') + (selections>=3?' done':'');
+    div.textContent = i+1;
+    div.onclick = () => { D=i; renderDay(); renderCal(); showPg('today', document.querySelector('.nav-item')); };
+    grid.appendChild(div);
+  }
+  // Detail
+  const sets = setsForDay(D);
+  const ds = getDay(D);
+  const dt = new Date(); dt.setDate(dt.getDate()+D);
+  document.getElementById('cal-num').textContent = D+1;
+  document.getElementById('cal-date2').textContent = dt.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short'});
+
+  const selCount = Object.keys(ds.sel).length;
+  let detail = `<div style="font-size:12px;font-weight:500;color:var(--muted);margin-bottom:8px">${selCount} of 5 meals selected · ${ds.juice?'✓':'○'} Ghiya juice · ${ds.ex?'✓':'○'} Exercise</div>`;
+  MEAL_CFG.forEach(cfg => {
+    const idx = ds.sel[cfg.key];
+    const custom = (ds.custom||{})[cfg.key];
+    const name = custom ? `✏️ ${custom.name}` : (idx !== undefined ? sets[cfg.key][idx]?.name : '—');
+    detail += `<div style="display:flex;gap:8px;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--border)"><span style="font-size:10px;font-weight:600;color:var(--muted);width:90px;flex-shrink:0">${cfg.label}</span><span style="font-size:12px;font-weight:500">${name || '—'}</span></div>`;
+  });
+  document.getElementById('cal-detail').innerHTML = detail;
+}
+
+// ═══════════════════════════════════════════════════════
+//  GUIDES
+// ═══════════════════════════════════════════════════════
+function renderGuides() {
+  document.getElementById('roti-list').innerHTML = ROTI_GUIDE.map(g => `
+    <div class="guide-row">
+      <div class="guide-row-top">
+        <span class="ge">${g.e}</span>
+        <span class="gn">${g.n}</span>
+        <span class="guide-badge" style="background:${g.col}22;color:${g.col}">${g.ver}</span>
+      </div>
+      <div class="guide-meta">
+        <span>Fiber <b>${g.fiber}</b></span>
+        <span>GI <b>${g.gi}</b></span>
+        <span>LDL <b style="color:${g.col}">${g.ldl}</b></span>
+      </div>
+      <div class="guide-sub" style="margin-top:5px">${g.note}</div>
+    </div>`).join('');
+
+  document.getElementById('protein-list').innerHTML = PROTEIN_GUIDE.map(p => `
+    <div class="guide-row">
+      <div class="guide-row-top">
+        <span class="ge">${p.e}</span>
+        <span class="gn">${p.n}</span>
+        <span class="guide-badge" style="background:${p.col}22;color:${p.col}">${p.ver}</span>
+      </div>
+      <div class="guide-meta">
+        <span>Protein <b style="color:var(--blue)">${p.prot}</b></span>
+        <span>Cholesterol <b>${p.chol}</b></span>
+        <span>Sat fat <b>${p.sat}</b></span>
+      </div>
+      <div class="guide-sub" style="margin-top:4px">${p.note}</div>
+    </div>`).join('');
+
+  document.getElementById('avoid-list').innerHTML = AVOID_LIST.map(a => `
+    <div class="guide-row">
+      <div class="guide-row-top">
+        <span class="ge">${a.e}</span>
+        <span class="gn">${a.n}</span>
+        <span class="guide-badge" style="background:#FEF0F2;color:#E8435A">Avoid</span>
+      </div>
+      <div class="guide-sub">${a.why}</div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════
+function showPg(name, btn) {
+  document.querySelectorAll('.pg').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('on'));
+  document.getElementById('pg-' + name).classList.add('on');
+  if (btn) btn.classList.add('on');
+  if (name==='cal') renderCal();
+  if (name==='guide') renderGuides();
+  if (name==='stats') refreshHeader();
+  if (name==='admin') renderAdmin();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ═══════════════════════════════════════════════════════
+//  ADMIN — LIVE MENU EDITOR
+// ═══════════════════════════════════════════════════════
+
+// We store overrides in localStorage: ST.menuOverrides[category][setIdx][itemIdx] = item
+// And additions: ST.menuAdditions[category][setIdx] = [item, ...]
+// And deletions: ST.menuDeletions[category][setIdx] = [itemIdx, ...]
+
+function getMenuData(category) {
+  // Returns the live (possibly overridden) array-of-sets for a category
+  const base = {
+    breakfast: BREAKFAST_SETS,
+    morning_snack: MORNING_SNACKS_SETS,
+    lunch: LUNCH_SETS,
+    evening_snack: EVENING_SNACKS_SETS,
+    dinner: DINNER_SETS,
+  };
+  if (category === 'office') return [OFFICE_SNACKS]; // single "set"
+
+  if (!base[category]) return [];
+  const overrides = (ST.menuOverrides || {})[category] || {};
+  const additions = (ST.menuAdditions || {})[category] || {};
+  const deletions = (ST.menuDeletions || {})[category] || {};
+
+  return base[category].map((set, si) => {
+    let items = set.map((item, ii) => overrides[si] && overrides[si][ii] ? overrides[si][ii] : item);
+    // filter deleted
+    const dels = deletions[si] || [];
+    items = items.filter((_, ii) => !dels.includes(ii));
+    // append additions
+    const adds = additions[si] || [];
+    return [...items, ...adds];
+  });
+}
+
+function getLiveOfficeSncks() {
+  const base = [...OFFICE_SNACKS];
+  const overrides = (ST.menuOverrides || {}).office || {};
+  const additions = (ST.menuAdditions || {}).office || {};
+  const deletions = (ST.menuDeletions || {}).office || {};
+  let items = base.map((item, i) => overrides[i] ? overrides[i] : item);
+  const dels = deletions[0] || [];
+  items = items.filter((_, i) => !dels.includes(i));
+  return [...items, ...(additions[0] || [])];
+}
+
+// Admin state
+let admCtx = null; // { category, setIdx, itemIdx } — null means "add new"
+let admSetViewing = {}; // { category: setIdx }
+
+function renderAdmin() {
+  const categories = ['breakfast','morning_snack','lunch','evening_snack','dinner','office'];
+  categories.forEach(cat => {
+    const data = cat === 'office' ? [getLiveOfficeSncks()] : getMenuData(cat);
+    const totalItems = data.reduce((s, set) => s + set.length, 0);
+    const cntEl = document.getElementById(`adm-cnt-${cat}`);
+    if (cntEl) cntEl.textContent = `${totalItems} items`;
+
+    if (cat === 'office') {
+      renderAdminItems('office', 0, getLiveOfficeSncks());
+    } else {
+      // render set tabs
+      const tabsEl = document.getElementById(`adm-tabs-${cat}`);
+      if (!tabsEl) return;
+      const si = admSetViewing[cat] || 0;
+      tabsEl.innerHTML = data.map((_, i) =>
+        `<div class="set-tab ${i===si?'on':''}" onclick="switchAdmSet('${cat}',${i})">Set ${i+1}</div>`
+      ).join('');
+      renderAdminItems(cat, si, data[si] || []);
+    }
+  });
+}
+
+function switchAdmSet(cat, si) {
+  admSetViewing[cat] = si;
+  const data = getMenuData(cat);
+  // update tabs
+  const tabsEl = document.getElementById(`adm-tabs-${cat}`);
+  if (tabsEl) {
+    tabsEl.querySelectorAll('.set-tab').forEach((el, i) => el.classList.toggle('on', i===si));
+  }
+  renderAdminItems(cat, si, data[si] || []);
+}
+
+function renderAdminItems(cat, si, items) {
+  const el = document.getElementById(`adm-items-${cat}`);
+  if (!el) return;
+  if (!items || items.length === 0) {
+    el.innerHTML = '<div style="padding:10px 0;font-size:12px;color:var(--muted)">No items. Add one below.</div>';
+    return;
+  }
+  el.innerHTML = items.map((item, ii) => {
+    const name = item.name || item.n || '';
+    const cal = item.cal || item.cal || 0;
+    const displayCal = cat === 'office' ? (item.cal || '') : `${cal} kcal`;
+    return `<div class="admin-item">
+      <div class="admin-item-name">${name}</div>
+      <div class="admin-item-cal">${displayCal}</div>
+      <div class="admin-item-btns">
+        <button class="ai-btn edit" onclick="openAdminEdit('${cat}',${si},${ii})">Edit</button>
+        <button class="ai-btn del" onclick="confirmAdmDelete('${cat}',${si},${ii})">Del</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleAdminSec(cat) {
+  const body = document.getElementById(`adm-body-${cat}`);
+  if (!body) return;
+  body.classList.toggle('open');
+  if (body.classList.contains('open')) renderAdmin();
+}
+
+// Open modal to EDIT existing
+function openAdminEdit(cat, si, ii) {
+  const data = cat === 'office' ? [getLiveOfficeSncks()] : getMenuData(cat);
+  const item = (data[si] || [])[ii];
+  if (!item) return;
+
+  admCtx = { cat, si, ii, isNew: false };
+  document.getElementById('adm-modal-title').textContent = 'Edit item';
+  document.getElementById('adm-f-name').value = item.name || item.n || '';
+  document.getElementById('adm-f-cal').value = item.cal || '';
+  document.getElementById('adm-f-prot').value = item.prot || '';
+  document.getElementById('adm-f-fib').value = item.fib || '';
+  document.getElementById('adm-f-carbs').value = item.carbs || '';
+  // tags
+  const tags = (item.tags || []).map(t => t.t || t).join(', ');
+  document.getElementById('adm-f-tags').value = tags;
+  document.getElementById('adm-f-recipe').value = item.recipe || '';
+  document.getElementById('adm-f-tip').value = item.tip || item.heartNote || item.ot || '';
+
+  document.getElementById('adm-f-recipe-wrap').style.display = cat === 'evening_snack' ? 'block' : 'none';
+  document.getElementById('adm-f-tags-wrap').style.display = cat === 'office' ? 'none' : 'block';
+  document.getElementById('adm-delete-btn').style.display = 'block';
+  document.getElementById('adm-modal').classList.add('open');
+}
+
+// Open modal to ADD new
+function openAdminAdd(cat) {
+  const si = admSetViewing[cat] || 0;
+  admCtx = { cat, si, ii: -1, isNew: true };
+  document.getElementById('adm-modal-title').textContent = 'Add new item';
+  document.getElementById('adm-f-name').value = '';
+  document.getElementById('adm-f-cal').value = '';
+  document.getElementById('adm-f-prot').value = '';
+  document.getElementById('adm-f-fib').value = '';
+  document.getElementById('adm-f-carbs').value = '';
+  document.getElementById('adm-f-tags').value = '';
+  document.getElementById('adm-f-recipe').value = '';
+  document.getElementById('adm-f-tip').value = '';
+  document.getElementById('adm-f-recipe-wrap').style.display = cat === 'evening_snack' ? 'block' : 'none';
+  document.getElementById('adm-f-tags-wrap').style.display = cat === 'office' ? 'none' : 'block';
+  document.getElementById('adm-delete-btn').style.display = 'none';
+  document.getElementById('adm-modal').classList.add('open');
+}
+
+function closeAdmModal() {
+  document.getElementById('adm-modal').classList.remove('open');
+  admCtx = null;
+}
+
+function saveAdmItem() {
+  if (!admCtx) return;
+  const { cat, si, ii, isNew } = admCtx;
+
+  const name   = document.getElementById('adm-f-name').value.trim();
+  const cal    = parseInt(document.getElementById('adm-f-cal').value) || 0;
+  const prot   = parseInt(document.getElementById('adm-f-prot').value) || 0;
+  const fib    = parseInt(document.getElementById('adm-f-fib').value) || 0;
+  const carbs  = parseInt(document.getElementById('adm-f-carbs').value) || 0;
+  const tagStr = document.getElementById('adm-f-tags').value;
+  const recipe = document.getElementById('adm-f-recipe').value.trim();
+  const tip    = document.getElementById('adm-f-tip').value.trim();
+  const chol   = 0;
+
+  if (!name) { alert('Please enter a name!'); return; }
+
+  // Build item object
+  const tags = tagStr.split(',').map(s => s.trim()).filter(Boolean).map(t => ({t, c:'b'}));
+  let newItem;
+  if (cat === 'office') {
+    newItem = { e:'🍽️', n:name, cal:`${cal} kcal`, tip };
+  } else {
+    newItem = { name, cal, prot, fib, carbs, chol, tags };
+    if (tip) newItem.tip = tip;
+    if (recipe) newItem.recipe = recipe;
+    if (recipe) newItem.heartNote = tip;
+  }
+
+  if (!ST.menuOverrides) ST.menuOverrides = {};
+  if (!ST.menuAdditions) ST.menuAdditions = {};
+
+  if (isNew) {
+    // Add to additions
+    if (!ST.menuAdditions[cat]) ST.menuAdditions[cat] = {};
+    if (!ST.menuAdditions[cat][si]) ST.menuAdditions[cat][si] = [];
+    ST.menuAdditions[cat][si].push(newItem);
+    showToast('Item added!');
+  } else {
+    // We need to figure out if this is a base item (override) or an addition (replace in place)
+    // Simple approach: store as override by original index
+    if (!ST.menuOverrides[cat]) ST.menuOverrides[cat] = {};
+    if (!ST.menuOverrides[cat][si]) ST.menuOverrides[cat][si] = {};
+    ST.menuOverrides[cat][si][ii] = newItem;
+    showToast('Item saved!');
+  }
+
+  save();
+  closeAdmModal();
+  renderAdmin();
+  // also re-render today in case active day uses this set
+  renderDay();
+}
+
+function confirmAdmDelete(cat, si, ii) {
+  admCtx = { cat, si, ii, isNew: false };
+  deleteAdmItem();
+}
+
+function deleteAdmItem() {
+  if (!admCtx) return;
+  const { cat, si, ii } = admCtx;
+  if (!confirm('Delete this item? This cannot be undone easily.')) return;
+
+  if (!ST.menuDeletions) ST.menuDeletions = {};
+  if (!ST.menuDeletions[cat]) ST.menuDeletions[cat] = {};
+  if (!ST.menuDeletions[cat][si]) ST.menuDeletions[cat][si] = [];
+  if (!ST.menuDeletions[cat][si].includes(ii)) ST.menuDeletions[cat][si].push(ii);
+
+  save(); closeAdmModal(); renderAdmin(); renderDay();
+  showToast('Item deleted');
+}
+
+function adminReset() {
+  if (!confirm('Reset ALL edits to defaults? All your menu changes will be lost.')) return;
+  delete ST.menuOverrides;
+  delete ST.menuAdditions;
+  delete ST.menuDeletions;
+  save(); renderAdmin(); renderDay();
+  showToast('Reset to defaults');
+}
+
+// Override setsForDay to use live data
+const _origSetsForDay = setsForDay;
+function setsForDay(d) {
+  const i = d % 6;
+  const liveBreakfast = getMenuData('breakfast')[i] || BREAKFAST_SETS[i];
+  const liveMorning   = getMenuData('morning_snack')[i] || MORNING_SNACKS_SETS[i];
+  const liveLunch     = getMenuData('lunch')[i] || LUNCH_SETS[i];
+  const liveEvening   = getMenuData('evening_snack')[i] || EVENING_SNACKS_SETS[i];
+  const liveDinner    = getMenuData('dinner')[i] || DINNER_SETS[i];
+  return {
+    breakfast: liveBreakfast,
+    morning_snack: liveMorning,
+    lunch: liveLunch,
+    evening_snack: liveEvening,
+    dinner: liveDinner,
+    exercise: EXERCISE_LIST[d % 7],
+  };
+}
+
+// INIT
+refreshHeader();
+renderDay();
+</script>
+
+</body>
+</html>
